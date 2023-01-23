@@ -1,0 +1,1 @@
+add_library(timemanager timemanager.cpp timemanager.h)

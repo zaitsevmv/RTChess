@@ -1,0 +1,1 @@
+add_library(ChessManager ChessManager.h ChessManager.cpp)

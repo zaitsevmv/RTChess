@@ -1,0 +1,1 @@
+add_library(visuals Frontend.h Frontend.cpp)
