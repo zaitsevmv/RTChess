@@ -6,6 +6,7 @@
 #include <QDateTime>
 #include <QThread>
 #include <algorithm>
+#include <QNetworkInterface>
 
 #include "Frontend.h"
 
@@ -68,12 +69,6 @@ void MainWindow::CreateTable() {
     DrawStartPosition();
     UpdateAfterASecond();
     startTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-    if(!ForTests){
-        tcpSck->connectToHost(QHostAddress("127.0.0.1"), 50000);
-        connect(tcpSck, SIGNAL(connected()), this, SLOT(SocketTestConnected()));
-        connect(tcpSck, SIGNAL(readyRead()), this, SLOT(slotReadCommandsTestsSocket()));
-        connect(tcpSck, SIGNAL(disconnected()), tcpSck, SLOT(deleteLater()));
-    }
 }
 
 void MainWindow::RunGameMenu() {
@@ -89,14 +84,16 @@ void MainWindow::RunGameMenu() {
         mainMenuLayout->addWidget(i,1,k,Qt::AlignCenter);
         k++;
     }
-    exitBtn->setFont(txtFont);
-    exitBtn->setFixedSize(height/18,height/18);
-    connect(exitBtn, SIGNAL(clicked()), this, SLOT(MainMenuButtonHandler()));
-    QGridLayout* exitLayout = new QGridLayout;
-    exitLayout->addWidget(exitBtn);
-    exitWidget = new QWidget;
-    exitWidget->setFixedSize(height/15,height/15);
-    exitWidget->setLayout(exitLayout);
+    if(firstTime){
+        exitBtn->setFont(txtFont);
+        exitBtn->setFixedSize(height/18,height/18);
+        connect(exitBtn, SIGNAL(clicked()), this, SLOT(MainMenuButtonHandler()));
+        QGridLayout* exitLayout = new QGridLayout;
+        exitLayout->addWidget(exitBtn);
+        exitWidget = new QWidget;
+        exitWidget->setFixedSize(height/15,height/15);
+        exitWidget->setLayout(exitLayout);
+    }
     centralWidget->setLayout(mainMenuLayout);
     this->setCentralWidget(centralWidget);
     centralWidget->setFixedSize(widgetSize);
@@ -134,7 +131,7 @@ void MainWindow::RunGameMenu() {
         testWidget->setLayout(testHBoxLayout);
 
         tcpSrv = new QTcpServer(this);
-        tcpSrv->listen(QHostAddress::LocalHost,50000);
+        tcpSrv->listen(QHostAddress::Any,50000);
         connect(tcpSrv, SIGNAL(newConnection()), this, SLOT(OnNewConnectionTests()));
     } else{
         tcpSck = new QTcpSocket(this);
@@ -156,11 +153,25 @@ void MainWindow::MainMenuButtonHandler() {
         QPushButton* thisBtn = (QPushButton*)sender();
         thisBtn->setFlat(true);
         thisBtn->setText("Ожидание подключения...");
-        thisServer->thisSocket->connectToHost(QHostAddress("127.0.0.1"), 33333);
+        QString password;
+        for(int i = 0; i < 8; i+=2){
+            password += QString::number(passwordEnter->text()[i].unicode()-65);
+            password += passwordEnter->text()[i+1];
+            if(i != 6){
+                password += ".";
+            }
+        }
+        testIpText = password;
+        QHostAddress targetAddress = QHostAddress(password);
+
+        thisServer->thisSocket->connectToHost(targetAddress, 33333);
 
         connect(thisServer->thisSocket, SIGNAL(readyRead()), this, SLOT(slotReadData()));
         connect(thisServer->thisSocket, SIGNAL(disconnected()), thisServer->thisSocket, SLOT(deleteLater()));
         connect(thisServer->thisSocket, SIGNAL(connected()), this, SLOT(SocketOnNewConnection()));
+
+        passwordEnter->setVisible(false);
+        passwordEnter = nullptr;
     } else if(btnText == "Начать заново"){
         RestartAll();
     } else if(btnText == "X"){
@@ -180,21 +191,38 @@ void MainWindow::ShowConnectToServerMenu() {
     if(isHost){
         thisServer = new MyServer(isHost,0);
         QLabel* waitForConnection = new QLabel;
+        QTcpSocket localServerIp;
+
+        localServerIp.connectToHost("8.8.8.8", 53);
+        localServerIp.waitForConnected();
+
         waitForConnection->setFont(txtFont);
-        waitForConnection->setText("Ожидание подключения...");
+        QStringList thisIpStringList = localServerIp.localAddress().toString().split(".");
+        testIpText = localServerIp.localAddress().toString();
+        QString password;
+        for(auto& num: thisIpStringList){
+            int n = num.toInt();
+            password += QString(n / 10 + 65);
+            password += QString::number(n % 10);
+        }
+        waitForConnection->setText("Пароль: " + password);
         waitForConnection->setAttribute(Qt::WA_TransparentForMouseEvents);
         connect(thisServer->ServerHost, SIGNAL(newConnection()), this, SLOT(OnNewConnection()));
 
         waitForConnection->setMinimumSize(height/4,height/10);
         connectMenuLayout->addWidget(waitForConnection,0,0,Qt::AlignCenter);
     } else{
+        passwordEnter = new QLineEdit;
+        passwordEnter->setFont(txtFont);
+        passwordEnter->setFixedSize(height/3,height/12);
         QPushButton* enterBtn = new QPushButton;
         enterBtn->setFont(txtFont);
         enterBtn->setText("Начать");
         connect(enterBtn, SIGNAL(clicked()),this, SLOT(MainMenuButtonHandler()));
 
         enterBtn->setMinimumSize(height/4,height/10);
-        connectMenuLayout->addWidget(enterBtn,0,0,Qt::AlignCenter);
+        connectMenuLayout->addWidget(passwordEnter,0,0,Qt::AlignCenter);
+        connectMenuLayout->addWidget(enterBtn,1,0,Qt::AlignCenter);
     }
     serverConnectWidget->setLayout(connectMenuLayout);
     serverConnectWidget->setFixedSize(widgetSize);
@@ -402,6 +430,7 @@ void MainWindow::UpdateCooldowns() {
 void MainWindow::GoToMainMenu()
 {
     serverConnectWidget = nullptr;
+    firstTime = false;
     if(thisServer != nullptr){
         if(isHost)
             thisServer->ServerHost->deleteLater();
@@ -495,6 +524,12 @@ void MainWindow::SocketOnNewConnection()
 {
     thisServer->StartGame();
     CreateTable();
+    if(!ForTests){
+        tcpSck->connectToHost(QHostAddress(testIpText), 50000);
+        connect(tcpSck, SIGNAL(connected()), this, SLOT(SocketTestConnected()));
+        connect(tcpSck, SIGNAL(readyRead()), this, SLOT(slotReadCommandsTestsSocket()));
+        connect(tcpSck, SIGNAL(disconnected()), tcpSck, SLOT(deleteLater()));
+    }
 }
 
 void MainWindow::OnNewConnection() {
@@ -503,6 +538,12 @@ void MainWindow::OnNewConnection() {
     connect(thisServer->thisSocket, SIGNAL(disconnected()), thisServer->thisSocket, SLOT(deleteLater()));
     thisServer->StartGame();
     CreateTable();
+    if(!ForTests){
+        tcpSck->connectToHost(QHostAddress(testIpText), 50000);
+        connect(tcpSck, SIGNAL(connected()), this, SLOT(SocketTestConnected()));
+        connect(tcpSck, SIGNAL(readyRead()), this, SLOT(slotReadCommandsTestsSocket()));
+        connect(tcpSck, SIGNAL(disconnected()), tcpSck, SLOT(deleteLater()));
+    }
 }
 
 void MainWindow::slotReadData() {

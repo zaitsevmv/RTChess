@@ -101,6 +101,7 @@ private:
     QWidget* centralWidget = new QWidget;
 
     QWidget* exitWidget;
+    QLineEdit* passwordEnter;
     QPushButton* exitBtn = new QPushButton("X");
 
     QWidget* serverConnectWidget;
@@ -155,6 +156,7 @@ private:
     QPushButton* restartBtn;
     //дизайн экрана окончания игры
 
+    bool firstTime = true;
     bool isPaused = true;
     //true - игра остановлена, первые 5 секунд игроки ждут, потом isPaused = false
 
@@ -167,6 +169,8 @@ private:
     QLabel* testText2;
     QPushButton* sendCommands1;
     QPushButton* sendCommands2;
+
+    QString testIpText;
 
     QTcpServer* tcpSrv;
     QTcpSocket* tcpSck;

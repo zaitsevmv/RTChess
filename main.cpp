@@ -8,11 +8,11 @@ int main(int argc, char *argv[]) {
     w.RunGameMenu();
     w.show();
 
-    //MainWindow w;
-    //w.ForTests = true;
-    //w.RunGameMenu();
-    //w.show();
-    //w.testWidget->show();
+    MainWindow w1;
+    w1.ForTests = true;
+    w1.RunGameMenu();
+    w1.show();
+    w1.testWidget->show();
     //пример приложения для тестов
 
     //MainWindow w1;

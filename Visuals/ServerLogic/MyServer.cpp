@@ -9,7 +9,7 @@ MyServer::MyServer(const bool isHost, int port)
     thisChessManager = new ChessManager;
     if(isHost){
         ServerHost = new QTcpServer;
-        ServerHost->listen(QHostAddress::LocalHost,33333+port);
+        ServerHost->listen(QHostAddress::Any,33333+port);
     } else{
         thisSocket = new QTcpSocket;
         thisSocket->open(QIODevice::ReadWrite);
