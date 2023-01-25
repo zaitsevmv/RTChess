@@ -522,6 +522,7 @@ void MainWindow::SendToTestServer(qint64 time)
 
 void MainWindow::SocketOnNewConnection()
 {
+    connect(thisServer->thisSocket, SIGNAL(disconnected()), this, SLOT(ShowWinMenu()));
     thisServer->StartGame();
     CreateTable();
     if(!ForTests){
@@ -534,6 +535,7 @@ void MainWindow::SocketOnNewConnection()
 
 void MainWindow::OnNewConnection() {
     thisServer->thisSocket = thisServer->ServerHost->nextPendingConnection();
+    connect(thisServer->thisSocket, SIGNAL(disconnected()), this, SLOT(ShowWinMenu()));
     connect(thisServer->thisSocket, SIGNAL(readyRead()), this, SLOT(slotReadData()));
     connect(thisServer->thisSocket, SIGNAL(disconnected()), thisServer->thisSocket, SLOT(deleteLater()));
     thisServer->StartGame();
@@ -544,6 +546,7 @@ void MainWindow::OnNewConnection() {
         connect(tcpSck, SIGNAL(readyRead()), this, SLOT(slotReadCommandsTestsSocket()));
         connect(tcpSck, SIGNAL(disconnected()), tcpSck, SLOT(deleteLater()));
     }
+    thisServer->ServerHost->close();
 }
 
 void MainWindow::slotReadData() {

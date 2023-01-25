@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.20)
 
 project(RTChess VERSION 1 LANGUAGES CXX)
 
@@ -43,3 +43,7 @@ target_link_libraries(RTChess PRIVATE Qt5::Widgets
 Qt5::Core
 Qt5::Gui
 Qt5::Network)
+
+install(TARGETS RTChess
+        BUNDLE  DESTINATION .
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
