@@ -191,6 +191,7 @@ void MainWindow::ShowConnectToServerMenu() {
     if(isHost){
         thisServer = new MyServer(isHost,0);
         QLabel* waitForConnection = new QLabel;
+        waitForConnection->setTextInteractionFlags(Qt::TextSelectableByMouse);
         QTcpSocket localServerIp;
 
         localServerIp.connectToHost("8.8.8.8", 53);
@@ -206,7 +207,6 @@ void MainWindow::ShowConnectToServerMenu() {
             password += QString::number(n % 10);
         }
         waitForConnection->setText("Пароль: " + password);
-        waitForConnection->setAttribute(Qt::WA_TransparentForMouseEvents);
         connect(thisServer->ServerHost, SIGNAL(newConnection()), this, SLOT(OnNewConnection()));
 
         waitForConnection->setMinimumSize(height/4,height/10);
