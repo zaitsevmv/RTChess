@@ -1,0 +1,6 @@
+*player 1 commands*
+5000 e2 e4
+10000 e4 e5
+*player 2 commands*
+5000 c2 c4
+10000 e2 e4

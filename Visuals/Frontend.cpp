@@ -212,6 +212,7 @@ void MainWindow::ShowConnectToServerMenu() {
         waitForConnection->setMinimumSize(height/4,height/10);
         connectMenuLayout->addWidget(waitForConnection,0,0,Qt::AlignCenter);
     } else{
+        thisServer = nullptr;
         passwordEnter = new QLineEdit;
         passwordEnter->setFont(txtFont);
         passwordEnter->setFixedSize(height/3,height/12);
@@ -434,8 +435,9 @@ void MainWindow::GoToMainMenu()
     if(thisServer != nullptr){
         if(isHost)
             thisServer->ServerHost->deleteLater();
-        else
+        else{
             thisServer->thisSocket->deleteLater();
+        }
     }
     thisServer = nullptr;
     centralWidget = new QWidget;
@@ -445,6 +447,8 @@ void MainWindow::GoToMainMenu()
 
 void MainWindow::RestartAll()
 {
+    firstTime = true;
+    isPaused = true;
     if(endWidget != nullptr){
         endgameMenu->setVisible(false);
         restartBtn->setVisible(false);
@@ -566,6 +570,7 @@ void MainWindow::DoAllTheJobAfterMove(std::pair<int,int>& pos, std::pair<int,int
 
 void MainWindow::ShowWinMenu()
 {
+    disconnect(thisServer->thisSocket, SIGNAL(disconnected()), this, SLOT(ShowWinMenu()));
     endWidget = new QWidget;
     disconnect(thisServer->thisChessManager->thisTimeManager->thisTimer, SIGNAL(timeout()),
             this, SLOT(UpdateAfterASecond()));
@@ -594,6 +599,7 @@ void MainWindow::ShowWinMenu()
 
 void MainWindow::ShowLoseMenu()
 {
+    disconnect(thisServer->thisSocket, SIGNAL(disconnected()), this, SLOT(ShowWinMenu()));
     endWidget = new QWidget;
     disconnect(thisServer->thisChessManager->thisTimeManager->thisTimer, SIGNAL(timeout()),
             this, SLOT(UpdateAfterASecond()));

@@ -1,4 +1,4 @@
-*player 1 commands*
+*player 1 commands for black*
 5010 a2 a4
 5020 b2 b4
 5030 c2 c4
@@ -23,7 +23,7 @@
 15160 f5 e6
 15170 g5 h6
 15180 h5 g6
-*player 2 commands*
+*player 2 commands for white*
 5010 a2 a4
 5020 b2 b4
 5030 c2 c4
