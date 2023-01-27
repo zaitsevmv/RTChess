@@ -214,6 +214,19 @@ void ChessManager::CommitMove(std::pair<int,int> pos, std::pair<int,int> target)
         thisTimeManager->AllTimes[target.first+GetId(target)][target.second] = 0;
     }
 
+    bool targetFound = false;
+    for(int i = 0; i < thisTimeManager->PositionsTime.size(); i++){
+        if(!targetFound && thisTimeManager->PositionsTime[i] == target){
+            thisTimeManager->AllTimes[target.first][target.second] = 0;
+            targetFound = true;
+        }
+        if(targetFound && i < thisTimeManager->PositionsTime.size()-1){
+            thisTimeManager->PositionsTime[i] = thisTimeManager->PositionsTime[i+1];
+        }
+    }
+    if(targetFound)
+        thisTimeManager->PositionsTime.pop_back();
+
     thisTimeManager->AllTimes[target.first][target.second] = cdMove;
     thisTimeManager->PositionsTime.push_back(target);
 

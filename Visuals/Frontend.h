@@ -11,6 +11,7 @@
 #include <QGuiApplication>
 #include <QTextBrowser>
 #include <QRegularExpression>
+#include <QCheckBox>
 #include <chrono>
 #include <ctime>
 #include <queue>
@@ -162,13 +163,10 @@ private:
 
     //тестирование
     //не имеют отношения к самой игре, просто существую для вызова хода в определенный момент времени
-    QTextEdit* inputTest1;
-    QTextEdit* inputTest2;
     QTextBrowser* outputTest;
-    QLabel* testText1;
-    QLabel* testText2;
-    QPushButton* sendCommands1;
-    QPushButton* sendCommands2;
+    QLabel* chosenFile;
+    QPushButton* chooseFile;
+    QCheckBox* changeSide;
 
     QString testIpText;
 
@@ -209,6 +207,11 @@ private:
 
     void SendToTestSocket(QString input);
     void SendToTestServer(qint64 time);
+
+    void CreateCommandsBothSides();
+    QString ExtractTextFromFile();
+    QString allCommandsFromFile;
+    bool sideChange = false;
 
     int curCommand = 0;
 private slots:

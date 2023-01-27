@@ -7,6 +7,8 @@
 #include <QThread>
 #include <algorithm>
 #include <QNetworkInterface>
+#include <QFile>
+#include <QFileDialog>
 
 #include "Frontend.h"
 
@@ -103,28 +105,16 @@ void MainWindow::RunGameMenu() {
     if(ForTests){
         QHBoxLayout* testHBoxLayout = new QHBoxLayout;
         QHBoxLayout* testHBoxLayout1 = new QHBoxLayout;
-        QHBoxLayout* testHBoxLayout2 = new QHBoxLayout;
-        QHBoxLayout* testHBoxLayout3 = new QHBoxLayout;
         QVBoxLayout* testVBoxLayout = new QVBoxLayout;
-        inputTest1 = new QTextEdit;
-        inputTest2 = new QTextEdit;
+        chosenFile = new QLabel;
+        chosenFile->setText("Файл не выбран");
         outputTest = new QTextBrowser;
-        testText1 = new QLabel;
-        testText1->setText("Player HOST");
-        testText2 = new QLabel;
-        testText2->setText("Player GUEST");
-        sendCommands1 = new QPushButton("Enter");
-        connect(sendCommands1, SIGNAL(clicked()), this, SLOT(SendButtonsHandler()));
-        sendCommands2 = new QPushButton("Send");
-        connect(sendCommands2, SIGNAL(clicked()), this, SLOT(SendButtonsHandler()));
-        testHBoxLayout1->addWidget(sendCommands1);
-        testHBoxLayout1->addWidget(sendCommands2);
-        testHBoxLayout2->addWidget(testText1);
-        testHBoxLayout2->addWidget(testText2);
-        testHBoxLayout3->addWidget(inputTest1);
-        testHBoxLayout3->addWidget(inputTest2);
-        testVBoxLayout->addLayout(testHBoxLayout2);
-        testVBoxLayout->addLayout(testHBoxLayout3);
+        chooseFile = new QPushButton("Выбрать файл");
+        connect(chooseFile, SIGNAL(clicked()), this, SLOT(SendButtonsHandler()));
+        changeSide = new QCheckBox("Поменять стороны");
+        testHBoxLayout1->addWidget(chooseFile);
+        testHBoxLayout1->addWidget(changeSide);
+        testVBoxLayout->addWidget(chosenFile);
         testVBoxLayout->addLayout(testHBoxLayout1);
         testHBoxLayout->addLayout(testVBoxLayout);
         testHBoxLayout->addWidget(outputTest);
@@ -629,22 +619,52 @@ void MainWindow::ShowLoseMenu()
 void MainWindow::SendButtonsHandler()
 {
     QString btnText = ((QPushButton*)sender())->text();
-    if(btnText == "Enter"){
-        QString allCommands = inputTest1->toPlainText();
-
-        QStringList thisComList = allCommands.split("\n");
-        while(!thisComList.empty()){
-            QString singleCommand = thisComList.takeFirst();
-            CommandCreation(singleCommand);
+    if(btnText == "Выбрать файл"){
+        allCommandsFromFile = ExtractTextFromFile();
+    } if(btnText == "Поменять стороны"){
+        if(sideChange){
+            sideChange = false;
+        } else{
+            sideChange = true;
         }
-
-        outputTest->setText(outputTest->toPlainText() + "\n" + allCommands);
-    } else if(btnText == "Send"){
-        QString allCommands = inputTest2->toPlainText();
-        SendToTestSocket(allCommands);
-
-        outputTest->setText(outputTest->toPlainText() + "\nКоманды игроку 2:\n" + allCommands);
     }
+}
+
+void MainWindow::CreateCommandsBothSides(){
+    QStringList commandListTwoParts = allCommandsFromFile.split("\n==\n");
+    QString allCommandsOne, allCommandsTwo;
+    if(!changeSide->isChecked()){
+        allCommandsOne = commandListTwoParts[0];
+        allCommandsTwo = commandListTwoParts[1];
+    } else{
+        allCommandsOne = commandListTwoParts[1];
+        allCommandsTwo = commandListTwoParts[0];
+    }
+
+    QStringList thisComList = allCommandsOne.split("\n");
+    while(!thisComList.empty()){
+        QString singleCommand = thisComList.takeFirst();
+        CommandCreation(singleCommand);
+    }
+
+    SendToTestSocket(allCommandsTwo);
+    outputTest->setText(outputTest->toPlainText() + allCommandsOne);
+    outputTest->setText(outputTest->toPlainText() + "\nКоманды игроку 2:\n" + allCommandsTwo);
+}
+
+QString MainWindow::ExtractTextFromFile() {
+    QString filePath;
+    filePath = QFileDialog::getOpenFileName(testWidget, "Выбрать файл для тестирования","","All Files (*.txt)");
+    QFile comFile(filePath);
+    if (!comFile.open(QIODevice::ReadOnly | QIODevice::Text))
+        return "";
+    chosenFile->setText("Выбран файл: " + filePath);
+    QTextStream in(&comFile);
+    QString fileData;
+    while (!in.atEnd()) {
+        fileData = in.readAll();
+    }
+    return fileData;
 }
 
 void MainWindow::slotReadCommandsTestsSocket()
@@ -702,6 +722,7 @@ void MainWindow::OnNewConnectionTests()
     tcpSck = tcpSrv->nextPendingConnection();
     connect(tcpSck, SIGNAL(readyRead()), this, SLOT(slotReadCommandsTestsServer()));
     connect(tcpSck, SIGNAL(disconnected()), tcpSck, SLOT(deleteLater()));
+    CreateCommandsBothSides();
 }
 
 void MainWindow::SocketTestConnected()
@@ -716,6 +737,7 @@ void MainWindow::TimeForCommandTest()
         possibleMoves = thisServer->thisChessManager->FindPossibleMoves(thisCom.pos.first,thisCom.pos.second);
         if(std::find(possibleMoves.begin(), possibleMoves.end(), thisCom.target) != possibleMoves.end()){
             thisServer->MakeMove(thisCom.pos,thisCom.target);
+            possibleMoves.clear();
             curCommand++;
         }
     }
