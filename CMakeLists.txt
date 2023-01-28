@@ -1,49 +1,60 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.14)
 
-project(RTChess VERSION 1 LANGUAGES CXX)
-
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt5 REQUIRED COMPONENTS
-    Core
-    Gui
-    Widgets
-    Network
-    REQUIRED)
+if (WIN32)
+    project(RTChess LANGUAGES CXX)
+elseif(UNIX)
+    project(RTChess)
+endif()
 
-find_package(Qt5 REQUIRED COMPONENTS
-    Core
-    Gui
-    Widgets
-    Network
-    REQUIRED)
+set(CMAKE_CONFIGURATION_TYPES "Release;RelWithDebInfo" CACHE STRING "" FORCE)
 
-set(PROJECT_SOURCES
-            main.cpp
-            Visuals/Frontend.cpp
-            Visuals/Frontend.h
-            Visuals/Frontend.ui
-            Visuals/ServerLogic/MyServer.cpp
-            Visuals/ServerLogic/MyServer.h
-            Visuals/ServerLogic/CommonChessLogic/ChessManager.h
-            Visuals/ServerLogic/CommonChessLogic/ChessManager.cpp
-            Visuals/ServerLogic/CommonChessLogic/TimeManager/timemanager.h
-            Visuals/ServerLogic/CommonChessLogic/TimeManager/timemanager.cpp)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_PREFIX_PATH $ENV{QTDIR})
 
-add_executable(RTChess
-        Img.qrc
-        ${PROJECT_SOURCES})
+find_package(Qt5Core REQUIRED)
+find_package(Qt5Widgets REQUIRED)
+find_package(Qt5Gui REQUIRED)
+find_package(Qt5Network REQUIRED)
 
-target_link_libraries(RTChess PRIVATE Qt5::Widgets
-Qt5::Core
-Qt5::Gui
-Qt5::Network)
+set(SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/Img"
+               "${CMAKE_CURRENT_BINARY_DIR}/Visuals"
+               "${CMAKE_CURRENT_BINARY_DIR}/Visuals/ServerLogic"
+               "${CMAKE_CURRENT_BINARY_DIR}/Visuals/ServerLogic/CommonChessLogic"
+               "${CMAKE_CURRENT_BINARY_DIR}/Visuals/ServerLogic/CommonChessLogic/TimeManager")
 
-install(TARGETS RTChess
-        BUNDLE  DESTINATION .
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+include_directories(${SOURCE_DIR})
+
+file(GLOB_RECURSE SOURCES
+        "${SOURCE_DIR}/*.ui"
+        "${SOURCE_DIR}/*.qrc"
+        "${SOURCE_DIR}/*.h"
+        "${SOURCE_DIR}/*.cpp"
+        )
+
+
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS
+        $<$<CONFIG:RELWITHDEBINFO>:QT_MESSAGELOGCONTEXT>
+        )
+
+
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_AUTOUIC_SEARCH_PATHS} ${FORMS_DIR})
+
+if (WIN32)
+    add_executable(RTChess WIN32 ${SOURCES})
+elseif(UNIX)
+    add_executable(RTChess ${SOURCES})
+endif()
+
+target_include_directories(RTChess PRIVATE ${SOURCE_DIR})
+
+target_link_libraries(RTChess Qt5::Widgets)
+target_link_libraries(RTChess Qt5::Core)
+target_link_libraries(RTChess Qt5::Gui)
+target_link_libraries(RTChess Qt5::Network)
+
+install(TARGETS RTChess DESTINATION .)

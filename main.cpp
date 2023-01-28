@@ -5,9 +5,10 @@
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     int n = 0;
-    if(argc > 1){
-        if((std::string)argv[1] == "-test"){
+    for(int i = 1; i < argc; i++){
+        if((std::string)argv[i] == "-test"){
             n = 1;
+            break;
         }
     }
     MainWindow w;

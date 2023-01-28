@@ -2,10 +2,11 @@
 #define RTCHESS_CHESSMANAGER_H
 
 #include <vector>
+
 #include "TimeManager/timemanager.h"
 
 class ChessManager: public QObject{
-Q_OBJECT
+    Q_OBJECT
 public:
     ChessManager() {  }
     ~ChessManager() {

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <QWidget>
+#include <QObject>
 #include <QTimer>
 #include <QDebug>
 

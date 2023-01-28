@@ -2,12 +2,13 @@
 #define RTCHESS2_MYSERVER_H
 
 #include <QWidget>
+#include <QObject>
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
 #include "CommonChessLogic/ChessManager.h"
 
 class MyServer: public QWidget {
-Q_OBJECT
+    Q_OBJECT
 public:
     explicit MyServer(bool isHost, int port);
     //Создание экземпляра MyServer с QTcpServer, QTcpSocket
