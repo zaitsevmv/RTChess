@@ -552,7 +552,7 @@ void MainWindow::DoAllTheJobAfterMove(std::pair<int,int>& pos, std::pair<int,int
     UpdateCooldowns();
 
     if(std::find(possibleMoves.begin(), possibleMoves.end(), target) != possibleMoves.end()
-            && std::find(possibleMoves.begin(), possibleMoves.end(), pos) != possibleMoves.end()){
+            || std::find(possibleMoves.begin(), possibleMoves.end(), pos) != possibleMoves.end()){
         ClearPossibleMoves();
         possibleMoves.clear();
     }
