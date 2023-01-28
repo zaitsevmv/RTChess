@@ -5,7 +5,7 @@
 #include <QObject>
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
-#include "CommonChessLogic/ChessManager.h"
+#include "ChessManager.h"
 
 class MyServer: public QWidget {
     Q_OBJECT

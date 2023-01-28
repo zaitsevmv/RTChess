@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "TimeManager/timemanager.h"
+#include "timemanager.h"
 
 class ChessManager: public QObject{
     Q_OBJECT

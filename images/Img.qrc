@@ -1,18 +1,18 @@
 <RCC>
     <qresource prefix="/">
-        <file>Img/-1.png</file>
-        <file>Img/-2.png</file>
-        <file>Img/-3.png</file>
-        <file>Img/-4.png</file>
-        <file>Img/-5.png</file>
-        <file>Img/-6.png</file>
         <file>Img/0.png</file>
         <file>Img/1.png</file>
+        <file>Img/-1.png</file>
         <file>Img/2.png</file>
+        <file>Img/-2.png</file>
         <file>Img/3.png</file>
+        <file>Img/-3.png</file>
         <file>Img/4.png</file>
+        <file>Img/-4.png</file>
         <file>Img/5.png</file>
+        <file>Img/-5.png</file>
         <file>Img/6.png</file>
+        <file>Img/-6.png</file>
         <file>Img/a.png</file>
         <file>Img/blue.png</file>
         <file>Img/lose.png</file>

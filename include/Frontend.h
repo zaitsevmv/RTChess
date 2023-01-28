@@ -15,7 +15,7 @@
 #include <chrono>
 #include <ctime>
 #include <queue>
-#include "ServerLogic/MyServer.h"
+#include "MyServer.h"
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
