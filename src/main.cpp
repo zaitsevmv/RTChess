@@ -1,14 +1,9 @@
 #include <QApplication>
-#include <QDirIterator>
 
 #include "Frontend.h"
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-    QDirIterator it(":", QDirIterator::Subdirectories);
-    while (it.hasNext()) {
-        qDebug() << it.next();
-    }
     int n = 0;
     for(int i = 1; i < argc; i++){
         if((std::string)argv[i] == "-test"){
